@@ -28,5 +28,5 @@ def take_handover_request(payload):
     return "success"
 def send_url_request(payload):
     auth = {"access_token": ACCTOKEN}
-    response = requests.post(FB_API_URL, params=auth, json=payload)
+    response = requests.post(FB_ATTACH_URL, params=auth, json=payload)
     return response

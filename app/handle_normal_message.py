@@ -25,6 +25,8 @@ def send_message(db, recipient_id, text, message_rec):
         payload = getYoga_displayed(recipient_id)
     elif message_rec["text"] == "Get img":
         payload = get_motiv_images(recipient_id)
+    elif message_rec["text"] == "Get meme":
+        payload = get_meme(recipient_id)
     elif message_rec.get("quick_reply"):
         payload = handle_quickreply(db, recipient_id, message_rec["quick_reply"]["payload"])
     else:
