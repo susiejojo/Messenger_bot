@@ -19,6 +19,10 @@ pipfile = "*"
 apscheduler = "*"
 dnspython = "*"
 schedule = "*"
+google-search = "*"
+google = "*"
+youtube-dl = "*"
+praw = "*"
 
 [requires]
 python_version = "3.6"
