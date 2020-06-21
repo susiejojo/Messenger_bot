@@ -13,3 +13,24 @@ def handle_nlp(message):
     if intent_response.get('intents') and intent_response["intents"][0]["name"] == 'talk_to_someone' and intent_response["intents"][0]["confidence"]>0.7:
         print(intent_response) 
         return "Talk to someone"
+    if intent_response.get('intents') and intent_response["intents"][0]["name"] == 'talk_to_psych' and intent_response["intents"][0]["confidence"]>0.7:
+        print(intent_response) 
+        return "Book an appointment"
+    if intent_response.get('intents') and intent_response["intents"][0]["name"] == 'get_yoga' and intent_response["intents"][0]["confidence"]>0.7:
+        print(intent_response) 
+        return "Get yoga"
+    if intent_response.get('intents') and intent_response["intents"][0]["name"] == 'get_quote' and intent_response["intents"][0]["confidence"]>0.7:
+        print(intent_response) 
+        return "Get a quote"
+    if intent_response.get('intents') and intent_response["intents"][0]["name"] == 'get_music' and intent_response["intents"][0]["confidence"]>0.7:
+        print(intent_response) 
+        return "Get music"
+    if intent_response.get('intents') and intent_response["intents"][0]["name"] == 'get_meme' and intent_response["intents"][0]["confidence"]>0.7:
+        print(intent_response) 
+        return "Get meme"
+    if intent_response.get('intents') and intent_response["intents"][0]["name"] == 'get_story' and intent_response["intents"][0]["confidence"]>0.7:
+        print(intent_response) 
+        return "Get stories"
+    if intent_response.get('intents') and intent_response["intents"][0]["name"] == 'get_joke' and intent_response["intents"][0]["confidence"]>0.7:
+        print(intent_response) 
+        return "Get a joke"

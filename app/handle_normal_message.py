@@ -35,6 +35,8 @@ def send_message(db, recipient_id, text, message_rec, new_user):
             payload = getYoga_displayed(recipient_id)
         elif intent == "Get stories":
             payload = get_motiv_images(recipient_id)
+        elif intent == "Get meme":
+            payload = get_meme(recipient_id)
         else:
             payload = {
                 "message": {"text": text},
