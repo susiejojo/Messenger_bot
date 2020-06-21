@@ -21,7 +21,7 @@ from .handle_quickreply import *
 from .handle_normal_message import *
 from .random_message import *
 from .send_message import *
-
+from wit import Wit
 from .utils import *
 
 MONGO_URL = DB_URL
@@ -105,9 +105,9 @@ def check_id(id):
 		db.joke_categories.insert_one({"user":id,"score1":20})
 		db.joke_categories.insert_one({"user":id,"score2":20})
 		db.joke_categories.insert_one({"user":id,"score3":20})
-		return 0
+		return (0,1)
 	else:
-		return check_user["status"]
+		return (check_user["status"],0)
 
 
 sched = BackgroundScheduler()
@@ -134,16 +134,16 @@ def receive_message():
 	else:
 		# get whatever message a user sent the bot
 		output = request.get_json()
-		#print(output)
+		print(output)
 		for event in output["entry"]:
 			if (event.get("messaging")):
 				messaging = event["messaging"]
 				for message in messaging:
 					recipient_id = message["sender"]["id"]
-					status = check_id(message["sender"]["id"])
+					status, new_user = check_id(message["sender"]["id"])
 					if status//10 == 0:
 						if message.get("message"):
-							handle_normal_message(db,recipient_id,message)
+							handle_normal_message(db,recipient_id,message, new_user)
 						elif message.get("postback"):
 							handle_postback(db, recipient_id, message["postback"])
 						elif message.get("optin"):
