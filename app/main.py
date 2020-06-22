@@ -46,6 +46,7 @@ def check_one_time_notif():
 			"message": {"text": "You have an appointment at " + i["app_time"]},
 		}
 		send_request(payload)
+
 def check_appointment():
 	time_now = datetime.datetime.now().strftime("%H:%M")
 	date_now = datetime.datetime.now().strftime("%d.%m.%Y")
@@ -98,6 +99,12 @@ def one_minute_jobs():
 
 
 def check_id(id):
+	print("abc1")
+	check_convo = db.flow_convo.find_one({"user": id})
+	print(check_convo)
+	if check_convo is None:
+		db.flow_convo.insert_one({"user":id,"tag":"null", "state":"null"})
+
 	check_user = db.user_status.find_one({"user": id})
 	if check_user is None:
 		db.user_status.insert_one({"user": id, "status": 0,"joke_calls":0})
@@ -108,7 +115,7 @@ def check_id(id):
 		return (0,1)
 	else:
 		return (check_user["status"],0)
-
+	
 
 sched = BackgroundScheduler()
 sched.add_job(check_one_time_notif, "cron", minute="0,10,20,30,40,50")
@@ -141,6 +148,7 @@ def receive_message():
 				for message in messaging:
 					recipient_id = message["sender"]["id"]
 					status, new_user = check_id(message["sender"]["id"])
+					print("abc2",status)
 					if status//10 == 0:
 						if message.get("message"):
 							handle_normal_message(db,recipient_id,message, new_user)
@@ -175,12 +183,19 @@ def receive_message():
 										},
 									}
 								else:
+									persona_id_patient = send_persona_request(
+										{
+											"name":"Patient",
+											"profile_picture_url":"https://cdn1.iconfinder.com/data/icons/complete-medical-healthcare-icons-for-apps-and-web/128/human-body1-512.png"
+										}
+									)
 									payload = {
 										"recipient": {"id": person["sp"]},
 										"notification_type": "regular",
 										"message": {
 											"text": response_sent_text
-										}
+										},
+										"persona_id" : persona_id_patient
 									}
 								send_request(payload)
 						else:
@@ -314,12 +329,19 @@ def receive_message():
 									},
 								}
 							else:
+								persona_id_psych = send_persona_request(
+									{
+										"name":"Psychiatrist",
+										"profile_picture_url" : "https://toppng.com/uploads/preview/doctor-symbol-11552760933piwfjbowrl.png"
+									}
+								)
 								payload = {
 										"recipient": {"id": person["fp"]},
 										"notification_type": "regular",
 										"message": {
 											"text": response_sent_text
-										}
+										},
+										"persona" : persona_id_psych
 									}
 							send_request(payload)    
 			elif (event.get("standby")):

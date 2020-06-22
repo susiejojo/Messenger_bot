@@ -23,6 +23,7 @@ google-search = "*"
 google = "*"
 youtube-dl = "*"
 praw = "*"
+spotipy = "*"
 wit = "*"
 
 [requires]

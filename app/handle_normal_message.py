@@ -10,15 +10,19 @@ def send_message(db, recipient_id, text, message_rec, new_user):
     if message_rec.get("quick_reply"):
         payload = handle_quickreply(db, recipient_id, message_rec["quick_reply"]["payload"])
     else:
-        intent = handle_nlp(message_rec)
+        intent = handle_nlp(db, recipient_id, message_rec)
         if intent == "":
             intent = message_rec["text"]
         if intent == "Greeting":
             payload = handle_greeting(recipient_id,new_user)
+            db.flow_convo.update_one({"user": recipient_id}, {'$set' : {"tag":"greeting", "state": "null"}})
         elif intent == "Talk to someone":
             payload = talk_to_someone(recipient_id, db)
+            db.flow_convo.update_one({"user": recipient_id}, {'$set' : {"tag" : "attachment"}})
+            db.flow_convo.insert_one({"user":recipient_id,"tag":"talk to someone"})
         elif intent == "Book an appointment":
             payload = book_appointment("", recipient_id, db)
+            db.flow_convo.insert_one({"user":recipient_id,"tag":"book_appointment"})
         elif intent == "color":
             payload = {
                 "recipient": {"id": recipient_id},
@@ -27,16 +31,41 @@ def send_message(db, recipient_id, text, message_rec, new_user):
             }
         elif intent == "Get a joke":
             payload = jokes_util(recipient_id,db)
+            db.flow_convo.update_one({"user": recipient_id}, {'$set' : {"tag" : "attachment"}})
         elif intent == "Get a quote":
             payload = get_quotes(recipient_id)
+            db.flow_convo.update_one({"user": recipient_id}, {'$set' : {"tag" : "attachment"}})
         elif intent == "Get music":
             payload = get_music(recipient_id)
+            db.flow_convo.update_one({"user": recipient_id}, {'$set' : {"tag" : "attachment"}})
         elif intent == "Get yoga":
             payload = getYoga_displayed(recipient_id)
+            db.flow_convo.update_one({"user": recipient_id}, {'$set' : {"tag" : "attachment"}})
         elif intent == "Get stories":
             payload = get_motiv_images(recipient_id)
-        elif intent == "Get meme":
+            db.flow_convo.update_one({"user": recipient_id}, {'$set' : {"tag" : "attachment"}})
+        elif intent == "Get memes":
             payload = get_meme(recipient_id)
+            db.flow_convo.update_one({"user": recipient_id}, {'$set' : {"tag" : "attachment"}})
+        elif intent == "Happy":
+            payload = handle_happy(recipient_id)
+            db.flow_convo.update_one({"user": recipient_id}, {'$set' : {"tag" : "Happy", "state": "Happy"}})
+        elif intent == "Sad":
+            payload = handle_sad(recipient_id)
+            db.flow_convo.update_one({"user": recipient_id}, {'$set' : {"tag" : "Sad", "state": "Sad"}})
+        elif intent == "Sorry":
+            payload = handle_sorry(recipient_id)
+            db.flow_convo.update_one({"user": recipient_id}, {'$set' : {"tag" : "Sorry"}})
+        elif intent == "Nice":
+            payload = handle_nice(recipient_id)
+        elif intent == "Sad negative":
+            payload = handle_sad_negative(recipient_id)
+            db.flow_convo.update_one({"user": recipient_id}, {'$set' : {"tag" : "Sad negative"}})
+        elif intent == "Confused last question":
+            payload = confused_last_question(recipient_id)
+            db.flow_convo.update_one({"user": recipient_id}, {'$set' : {"tag" : "Confused last question"}})
+        elif intent == "Didn't get":
+            payload = didnt_get(recipient_id)
         else:
             payload = {
                 "message": {"text": text},
