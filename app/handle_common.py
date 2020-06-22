@@ -119,4 +119,23 @@ def didnt_get(recipient_id):
         "message": {"text": "I actually didn't get what u said. Can you say it again?"}
     }
     return payload
-    
+def call_for_help(recipient_id):
+    payload = {
+        "recipient": {"id": recipient_id},
+        "messaging_type":"RESPONSE",
+        "message":{
+            "attachment":{
+                "type":"template",
+                "payload":{
+                    "template_type":"button",
+                    "text":"National Suicide Prevention Helpline",
+                    "buttons":[
+                    {
+                        "type":"phone_number",
+                        "title":"Call for help",
+                        "payload":"09152987821"
+                    }]
+                }
+            }
+        }
+    }
