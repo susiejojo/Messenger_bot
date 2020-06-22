@@ -1,8 +1,9 @@
 import wit
-from .config import WIT_INTENT
+from .config import WIT_INTENT, WIT_DEPRESS
 from .handle_common import *
 
 client_intent = wit.Wit(WIT_INTENT)
+client_depress = wit.Wit(WIT_DEPRESS)
 
 def firstTrait(nlp, name):
     if nlp.get("traits"):
@@ -23,10 +24,15 @@ def handle_nlp(db, recipient_id, message):
     if (greeting and greeting["confidence"] > 0.8):
         return "Greeting"
     intent_response = client_intent.message(message["text"])
-    if message["text"] == "happy":
-        return "Happy"
-    elif message["text"] == "sad":
-        return "Sad"
+    depress_response = client_depress.message(message["text"])
+    depress_text = ''
+    if depress_response['entities'].get('Happy:Happy'):
+        depress_text = 'Happy'
+    elif depress_response['entities'].get('Depressed:Depressed'):
+        depress_text = 'Sad'
+    elif depress_response['entities'].get('Suicidal:Suicidal'):
+        depress_text = 'Suicidal'    
+    print(depress_response)
     if intent_response.get('intents') and intent_response["intents"][0]["name"] == 'talk_to_someone' and intent_response["intents"][0]["confidence"]>0.7:
         print(intent_response) 
         return "Talk to someone"
@@ -53,12 +59,16 @@ def handle_nlp(db, recipient_id, message):
     elif intent_response.get('intents') and intent_response["intents"][0]["name"] == 'get_joke' and intent_response["intents"][0]["confidence"]>0.7:
         print(intent_response) 
         return "Get a joke"
+    elif depress_text == "Happy":
+        return "Happy"
+    elif depress_text == "Sad":
+        return "Sad"
     elif sentiment["value"] == "positive" and last_convo == "attachment":
         return "Nice"
     elif last_convo == "Happy" and sentiment["value"] == "positive":
         return handle_happy_person(recipient_id)
     elif last_convo == "Sad" and sentiment["value"] == "positive":            # can handle it someway else
-        return handle_sad_person(recipient_id)
+        return cheer_up(recipient_id)
     elif last_convo == "attachment" and sentiment["value"] == "negative" and state == "Sad":
         return "Sad negative"
     elif sentiment["value"] == "negative":
