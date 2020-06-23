@@ -16,6 +16,9 @@ def send_message(db, recipient_id, text, message_rec, new_user):
         if intent == "Greeting":
             payload = handle_greeting(recipient_id,new_user)
             db.flow_convo.update_one({"user": recipient_id}, {'$set' : {"tag":"greeting", "state": "null"}})
+        if intent == "Bye":
+            payload = handle_bye(recipient_id,new_user)
+            db.flow_convo.update_one({"user": recipient_id}, {'$set' : {"tag":"bye", "state": "null"}})
         elif intent == "Talk to someone":
             payload = talk_to_someone(recipient_id, db)
             db.flow_convo.update_one({"user": recipient_id}, {'$set' : {"tag" : "attachment"}})
@@ -58,6 +61,8 @@ def send_message(db, recipient_id, text, message_rec, new_user):
             db.flow_convo.update_one({"user": recipient_id}, {'$set' : {"tag" : "Sorry"}})
         elif intent == "Nice":
             payload = handle_nice(recipient_id)
+        elif intent == "Hurt":
+            payload = handle_hurt(recipient_id)
         elif intent == "Sad negative":
             payload = handle_sad_negative(recipient_id)
             db.flow_convo.update_one({"user": recipient_id}, {'$set' : {"tag" : "Sad negative"}})

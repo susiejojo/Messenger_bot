@@ -23,6 +23,7 @@ from .random_message import *
 from .send_message import *
 from wit import Wit
 from .utils import *
+from .handle_nlp import *
 
 MONGO_URL = DB_URL
 
@@ -211,10 +212,12 @@ def receive_message():
 										{"sp": message["sender"]["id"]}
 									)
 									recipient_id = person["fp"]
+									sender_id = person["sp"]
 									cur_speaker = "sp"
 									persona_id_cur = person["persona_id_sp"]
 								else:
 									recipient_id = person["sp"]
+									sender_id = person["fp"]
 									cur_speaker = "fp"
 									persona_id_cur = person["persona_id_fp"]
 								response_sent_text = message["message"]["text"]
@@ -286,14 +289,24 @@ def receive_message():
 									}
 									send_request(payload_partner)
 								else:
-									payload = {
-										"recipient": {"id": recipient_id},
-										"notification_type": "regular",
-										"message": {
-											"text": response_sent_text
-										},
-										"persona_id": persona_id_cur
-									}
+									if handle_hatespeech(message["message"]):
+										payload = {
+											"recipient": {"id": sender_id},
+											"notification_type": "regular",
+											"message": {
+												"text": "You are violating our code of conduct. Please don't take use any abusive or sexist language. This action have been reported"
+											}
+										}
+										db.hate_messages.insert_one({"sender": sender_id, "message": response_sent_text})
+									else:
+										payload = {
+											"recipient": {"id": recipient_id},
+											"notification_type": "regular",
+											"message": {
+												"text": response_sent_text
+											},
+											"persona_id": persona_id_cur
+										}
 								print("mesages sent")
 								send_request(payload)
 								timestamp_str = "timestamp_"+cur_speaker

@@ -15,14 +15,23 @@ def secondTrait(nlp, name):
     else:
         return None
 
+def handle_hatespeech(message):
+    intent_response = client_intent.message(message["text"])
+    if intent_response.get('intents') and intent_response["intents"][0]["name"] == 'hatespeech' and intent_response["intents"][0]["confidence"]>0.7:
+        return True
+    else:
+        return False
 def handle_nlp(db, recipient_id, message):
     greeting = firstTrait(message["nlp"], 'wit$greetings')
     sentiment = firstTrait(message["nlp"], 'wit$sentiment')
+    bye = firstTrait(message["nlp"], 'wit$bye')
     print(sentiment and sentiment["value"],sentiment and sentiment["confidence"])
     last_convo = db.flow_convo.find_one({"user": recipient_id})["tag"]
     state = db.flow_convo.find_one({"user": recipient_id})["state"]
     if (greeting and greeting["confidence"] > 0.8):
         return "Greeting"
+    if (bye and bye["confidence"] > 0.8):
+        return "Bye"
     intent_response = client_intent.message(message["text"])
     depress_response = client_depress.message(message["text"])
     depress_text = ''
@@ -36,6 +45,8 @@ def handle_nlp(db, recipient_id, message):
     if intent_response.get('intents') and intent_response["intents"][0]["name"] == 'talk_to_someone' and intent_response["intents"][0]["confidence"]>0.7:
         print(intent_response) 
         return "Talk to someone"
+    elif intent_response.get('intents') and intent_response["intents"][0]["name"] == 'hatespeech' and intent_response["intents"][0]["confidence"]>0.7:
+        return "Hurt"
     elif last_convo == "Confused last question" and sentiment["value"] == "positive":
         return "Talk to someone"
     elif intent_response.get('intents') and intent_response["intents"][0]["name"] == 'talk_to_psych' and intent_response["intents"][0]["confidence"]>0.7:

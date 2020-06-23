@@ -119,4 +119,19 @@ def didnt_get(recipient_id):
         "message": {"text": "I actually didn't get what u said. Can you say it again?"}
     }
     return payload
+
+def handle_hurt(recipient_id):
+    payload = {
+        "recipient": {"id": recipient_id},
+        "messaging_type": "RESPONSE",
+        "message": {"text": "Oww! I am hurt. Please be nice to me. I know you are not in the right mood."}
+    }
+    return payload
     
+def handle_bye(recipient_id):
+    payload = {
+        "recipient": {"id": recipient_id},
+        "messaging_type": "RESPONSE",
+        "message": {"text": "It was really nice to talk with you. Let me know if you need any other help. See you soon!!!"}
+    }
+    return payload
