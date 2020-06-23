@@ -53,11 +53,18 @@ def send_message(db, recipient_id, text, message_rec, new_user):
         elif intent == "Sad":
             payload = handle_sad(recipient_id)
             db.flow_convo.update_one({"user": recipient_id}, {'$set' : {"tag" : "Sad", "state": "Sad"}})
+        elif intent == "Suicidal":
+            payload = handle_suicidal(recipient_id)
+            db.flow_convo.update_one({"user": recipient_id}, {'$set' : {"tag" : "Suicidal", "state": "Suicidal"}})
+        elif intent == "handle_suicide2":
+            payload = handle_suicide2(recipient_id)
         elif intent == "Sorry":
             payload = handle_sorry(recipient_id)
             db.flow_convo.update_one({"user": recipient_id}, {'$set' : {"tag" : "Sorry"}})
         elif intent == "Nice":
             payload = handle_nice(recipient_id)
+        elif intent == "Bot info":
+            payload = bot_info(recipient_id)
         elif intent == "Sad negative":
             payload = handle_sad_negative(recipient_id)
             db.flow_convo.update_one({"user": recipient_id}, {'$set' : {"tag" : "Sad negative"}})
