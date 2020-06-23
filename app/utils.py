@@ -126,7 +126,7 @@ def get_music(recipient_id):
 	return payload
 def find_related_urls(title,website):
 	try:
-		from google import search 
+		from googlesearch import search 
 	except ImportError:
 		print("No module named 'google' found") 
 	#print(title)
