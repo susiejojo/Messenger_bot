@@ -6,8 +6,8 @@ from .handle_common import *
 client_intent = wit.Wit(WIT_INTENT)
 client_depress = wit.Wit(WIT_DEPRESS)
 
-positive_list = ["yup","yeah","yes","that's right","sure","totally","cool","i'm in","thanks","works with me","amazing","great","yup","fine","alright","ok","okay"]
-negative_list = ["no","nope","nah","that is insane","are you crazy?","what is wrong with you?","whatever","i don't want this","never","that's not right","that is bad","this makes no sense"]
+positive_list = ["yup","yeah","yes","that's right","wow","sure","totally","cool","i'm in","thanks","works with me","amazing","great","yup","fine","alright","ok","okay"]
+negative_list = ["no","nope","nah","that is insane","are you crazy?","no way","what is wrong with you?","whatever","i don't want this","never","that's not right","that is bad","this makes no sense"]
 
 def firstTrait(nlp, name):
     if nlp.get("traits"):
@@ -76,7 +76,7 @@ def handle_nlp(db, recipient_id, message):
     elif intent_response.get('intents') and intent_response["intents"][0]["name"] == 'cheer_up' and intent_response["intents"][0]["confidence"]>0.7:
         print(intent_response)
         return cheer_up(recipient_id)
-    elif intent_response.get('intents') and intent_response["intents"][0]["name"] == 'bot_help' and intent_response["intents"][0]["confidence"]>0.7:
+    elif (message["text"] =="/help" or (intent_response.get('intents') and intent_response["intents"][0]["name"] == 'bot_help' and intent_response["intents"][0]["confidence"]>0.7)):
         print(intent_response)
         return "Bot info"
     elif intent_response.get('intents') and intent_response["intents"][0]["name"] == 'get_joke' and intent_response["intents"][0]["confidence"]>0.7:

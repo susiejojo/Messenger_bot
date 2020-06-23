@@ -1,4 +1,3 @@
-
 from .fb_requests import *
 from .quick_replies import generate_dates, generate_slots, generate_reminder_slots
 import datetime

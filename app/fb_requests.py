@@ -6,6 +6,7 @@ FB_ATTACH_URL = "https://graph.facebook.com/v7.0/me/message_attachments"
 FB_PERSONA_URL = "https://graph.facebook.com/me/personas"
 FB_HANDOVER_URL = "https://graph.facebook.com/v7.0/me/pass_thread_control"
 FB_TAKE_URL = "https://graph.facebook.com/v7.0/me/take_thread_control"
+FB_PROFILE_URL = "https://graph.facebook.com/v7.0/me/messenger_profile"
 def send_request(payload):
     auth = {"access_token": ACCTOKEN}
     print("Payload:")

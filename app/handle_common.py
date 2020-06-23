@@ -6,7 +6,7 @@ def handle_greeting(recipient_id, new_user):
     message = ""
     if new_user:
         message = (
-            "Hi there! Enter /help to view what I can do. How can I help you today?"
+        "Hi there! I am CheerioBot.\nI can keep you entertained with songs,memes,jokes,quotes and connect you to fellow users\nor therapists if you feel depressed. I can schedule your appointments and put you through live chat with your therapist.\nI also work to detect hatespeech and sensitive information in your chats with others to maintain your privacy.\nWith me around, I promise you will never feel lonely! Anytime u feel like you are feeling upset, just let me know\nand I will do my magic on you!\nIf you are willing to know in details what all I am capable of, just go ahead and ask or type /help."
         )
     else:
         message = "Welcome back!!! How are you feeling today?"
