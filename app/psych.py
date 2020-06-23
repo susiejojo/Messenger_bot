@@ -1,3 +1,4 @@
+import datetime
 from .fb_requests import *
 from .send_message import *
 
@@ -21,21 +22,22 @@ def psych_send_message(text,recipient_id,message_rec,psych_id,db):
 		print (slots_list)
 		elements_list = []
 		for date in slots_list.keys():
-			button_desc = []
-			for time in slots_list[date]:
-				button_one = {
-				"type":"web_url",
-			    "title":time,
-			    "payload":"trash"
-			    }
-				button_desc.append(button_one)
-			element_desc={
-			 	"title":date,
-	            "image_url":"https://png.pngtree.com/thumb_back/fh260/background/20190903/pngtree-colorful-bright-smoke-texture-background-image_312909.jpg",
-	            "subtitle":"Your slots for the day:",
-	            "buttons":button_desc
-			}
-			elements_list.append(element_desc)
+			if date == datetime.datetime.now().strftime("%d.%m.%Y"):
+				button_desc = []
+				for time in slots_list[date]:
+					button_one = {
+					"type":"postback",
+				    "title":time,
+				    "payload":"trash"
+				    }
+					button_desc.append(button_one)
+				element_desc={
+				 	"title":date,
+		            "image_url":"https://png.pngtree.com/thumb_back/fh260/background/20190903/pngtree-colorful-bright-smoke-texture-background-image_312909.jpg",
+		            "subtitle":"Your slots for today:",
+		            "buttons":button_desc
+				}
+				elements_list.append(element_desc)
 		print (elements_list)
 		payload = {
                 "recipient": {"id": recipient_id},
