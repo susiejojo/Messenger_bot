@@ -294,7 +294,7 @@ def receive_message():
 											"recipient": {"id": sender_id},
 											"notification_type": "regular",
 											"message": {
-												"text": "You are violating our code of conduct. Please don't take use any abusive or sexist language. This action have been reported"
+												"text": "You are violating our code of conduct. Please don't take use any abusive or sexist language. This action has been reported"
 											}
 										}
 										db.hate_messages.insert_one({"sender": sender_id, "message": response_sent_text})

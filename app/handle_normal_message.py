@@ -14,10 +14,11 @@ def send_message(db, recipient_id, text, message_rec, new_user):
         if intent == "":
             intent = message_rec["text"]
         if intent == "Greeting":
+            print("greeting2")
             payload = handle_greeting(recipient_id,new_user)
             db.flow_convo.update_one({"user": recipient_id}, {'$set' : {"tag":"greeting", "state": "null"}})
-        if intent == "Bye":
-            payload = handle_bye(recipient_id,new_user)
+        elif intent == "Bye":
+            payload = handle_bye(recipient_id)
             db.flow_convo.update_one({"user": recipient_id}, {'$set' : {"tag":"bye", "state": "null"}})
         elif intent == "Talk to someone":
             payload = talk_to_someone(recipient_id, db)
@@ -56,6 +57,11 @@ def send_message(db, recipient_id, text, message_rec, new_user):
         elif intent == "Sad":
             payload = handle_sad(recipient_id)
             db.flow_convo.update_one({"user": recipient_id}, {'$set' : {"tag" : "Sad", "state": "Sad"}})
+        elif intent == "Suicidal":
+            payload = handle_suicidal(recipient_id)
+            db.flow_convo.update_one({"user": recipient_id}, {'$set' : {"tag" : "Suicidal", "state": "Suicidal"}})
+        elif intent == "handle_suicide2":
+            payload = handle_suicide2(recipient_id)
         elif intent == "Sorry":
             payload = handle_sorry(recipient_id)
             db.flow_convo.update_one({"user": recipient_id}, {'$set' : {"tag" : "Sorry"}})
@@ -63,6 +69,8 @@ def send_message(db, recipient_id, text, message_rec, new_user):
             payload = handle_nice(recipient_id)
         elif intent == "Hurt":
             payload = handle_hurt(recipient_id)
+        elif intent == "Bot info":
+            payload = bot_info(recipient_id)
         elif intent == "Sad negative":
             payload = handle_sad_negative(recipient_id)
             db.flow_convo.update_one({"user": recipient_id}, {'$set' : {"tag" : "Sad negative"}})

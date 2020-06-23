@@ -24,9 +24,9 @@ def psych_send_message(text,recipient_id,message_rec,psych_id,db):
 			button_desc = []
 			for time in slots_list[date]:
 				button_one = {
-					"type":"web_url",
-					"title":time,
-					"payload" : "trash"
+				"type":"web_url",
+			    "title":time,
+			    "payload":"trash"
 			    }
 				button_desc.append(button_one)
 			element_desc={
