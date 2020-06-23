@@ -33,6 +33,30 @@ def handle_quickreply(db, recipient_id, qreply):
             "recipient": {"id": recipient_id},
             "notification_type": "regular",
         }
+    elif qreply.startswith("message"):
+        qlist = qreply.split(" ")
+        print(qlist)
+        if qlist[1] == "no":
+            # message yes 3151750784885803 294936331889357 2639884122779532--henlo--
+            payload = {
+                "message": {"text": "The message was not sent"},
+                "recipient": {"id": recipient_id},
+                "notification_type": "regular",
+            }
+        else:
+            message_sent = qlist[4].split('--')[1]
+            partner_payload = {
+                "message" : {"text": message_sent},
+                "recipient" : {"id": qlist[4].split('--')[0]},
+                "notification_type": "regular",
+                "persona_id": qlist[3]
+            }
+            send_request(partner_payload)
+            payload = {
+                "message": {"text": "The message was sent"},
+                "recipient": {"id": recipient_id},
+                "notification_type": "regular",
+            }
     elif qreply in like_replies:
             ind = like_replies.index(qreply)
             ind_cat = "score"+str(ind)
