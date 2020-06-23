@@ -21,8 +21,9 @@ from .handle_quickreply import *
 from .handle_normal_message import *
 from .random_message import *
 from .send_message import *
-
+from wit import Wit
 from .utils import *
+from .handle_nlp import *
 
 MONGO_URL = DB_URL
 
@@ -46,6 +47,7 @@ def check_one_time_notif():
 			"message": {"text": "You have an appointment at " + i["app_time"]},
 		}
 		send_request(payload)
+
 def check_appointment():
 	time_now = datetime.datetime.now().strftime("%H:%M")
 	date_now = datetime.datetime.now().strftime("%d.%m.%Y")
@@ -98,6 +100,12 @@ def one_minute_jobs():
 
 
 def check_id(id):
+	print("abc1")
+	check_convo = db.flow_convo.find_one({"user": id})
+	print(check_convo)
+	if check_convo is None:
+		db.flow_convo.insert_one({"user":id,"tag":"null", "state":"null"})
+
 	check_user = db.user_status.find_one({"user": id})
 	if check_user is None:
 		db.user_status.insert_one({"user": id, "status": 0,"joke_calls":0})
@@ -105,10 +113,10 @@ def check_id(id):
 		db.joke_categories.insert_one({"user":id,"score1":20})
 		db.joke_categories.insert_one({"user":id,"score2":20})
 		db.joke_categories.insert_one({"user":id,"score3":20})
-		return 0
+		return (0,1)
 	else:
-		return check_user["status"]
-
+		return (check_user["status"],0)
+	
 
 sched = BackgroundScheduler()
 sched.add_job(check_one_time_notif, "cron", minute="0,10,20,30,40,50")
@@ -134,16 +142,17 @@ def receive_message():
 	else:
 		# get whatever message a user sent the bot
 		output = request.get_json()
-		#print(output)
+		print(output)
 		for event in output["entry"]:
 			if (event.get("messaging")):
 				messaging = event["messaging"]
 				for message in messaging:
 					recipient_id = message["sender"]["id"]
-					status = check_id(message["sender"]["id"])
+					status, new_user = check_id(message["sender"]["id"])
+					print("abc2",status)
 					if status//10 == 0:
 						if message.get("message"):
-							handle_normal_message(db,recipient_id,message)
+							handle_normal_message(db,recipient_id,message, new_user)
 						elif message.get("postback"):
 							handle_postback(db, recipient_id, message["postback"])
 						elif message.get("optin"):
@@ -175,12 +184,19 @@ def receive_message():
 										},
 									}
 								else:
+									persona_id_patient = send_persona_request(
+										{
+											"name":"Patient",
+											"profile_picture_url":"https://cdn1.iconfinder.com/data/icons/complete-medical-healthcare-icons-for-apps-and-web/128/human-body1-512.png"
+										}
+									)
 									payload = {
 										"recipient": {"id": person["sp"]},
 										"notification_type": "regular",
 										"message": {
 											"text": response_sent_text
-										}
+										},
+										"persona_id" : persona_id_patient
 									}
 								send_request(payload)
 						else:
@@ -196,10 +212,12 @@ def receive_message():
 										{"sp": message["sender"]["id"]}
 									)
 									recipient_id = person["fp"]
+									sender_id = person["sp"]
 									cur_speaker = "sp"
 									persona_id_cur = person["persona_id_sp"]
 								else:
 									recipient_id = person["sp"]
+									sender_id = person["fp"]
 									cur_speaker = "fp"
 									persona_id_cur = person["persona_id_fp"]
 								response_sent_text = message["message"]["text"]
@@ -271,14 +289,24 @@ def receive_message():
 									}
 									send_request(payload_partner)
 								else:
-									payload = {
-										"recipient": {"id": recipient_id},
-										"notification_type": "regular",
-										"message": {
-											"text": response_sent_text
-										},
-										"persona_id": persona_id_cur
-									}
+									if handle_hatespeech(message["message"]):
+										payload = {
+											"recipient": {"id": sender_id},
+											"notification_type": "regular",
+											"message": {
+												"text": "You are violating our code of conduct. Please don't take use any abusive or sexist language. This action has been reported"
+											}
+										}
+										db.hate_messages.insert_one({"sender": sender_id, "message": response_sent_text})
+									else:
+										payload = {
+											"recipient": {"id": recipient_id},
+											"notification_type": "regular",
+											"message": {
+												"text": response_sent_text
+											},
+											"persona_id": persona_id_cur
+										}
 								print("mesages sent")
 								send_request(payload)
 								timestamp_str = "timestamp_"+cur_speaker
@@ -314,12 +342,19 @@ def receive_message():
 									},
 								}
 							else:
+								persona_id_psych = send_persona_request(
+									{
+										"name":"Psychiatrist",
+										"profile_picture_url" : "https://toppng.com/uploads/preview/doctor-symbol-11552760933piwfjbowrl.png"
+									}
+								)
 								payload = {
 										"recipient": {"id": person["fp"]},
 										"notification_type": "regular",
 										"message": {
 											"text": response_sent_text
-										}
+										},
+										"persona" : persona_id_psych
 									}
 							send_request(payload)    
 			elif (event.get("standby")):

@@ -1,7 +1,9 @@
+import praw
 import random
 import requests
 from .quick_replies import *
 from .fb_requests import *
+from .config import *
 def jokes_util(recipient_id,db):
 	#category = db.joke_categories.aggregate({"$group" : {"_id": null, max: {"$max" : "$score" }}})
 	#category = db.joke_categories.find()
@@ -88,22 +90,38 @@ def get_quotes(recipient_id):
 	return payload
 
 def get_music(recipient_id):
+	cid = ""
+	secret = ""
+	redir_url = "http://localhost:8888"
 	payload = {
-	"recipient":{"id":recipient_id},
+	"recipient": {"id": recipient_id},
+	"notification_type": "regular",
 	"message":{
-	"attachment":{
-	"type":"template",
-	"payload":{
-	"template_type": "media",
-	"elements":[
-		{
-		"media_type": "video",
-		"url":"https://www.facebook.com/Formula1/videos/2650561241646424"
-		}
-		]
-	}
-	}
-	}
+    "attachment":{
+      "type":"template",
+      "payload":{
+        "template_type":"generic",
+        "elements":[
+           {
+           "title":"Top song suggestions for you!",
+           "image_url":"https://www.bensound.com/bensound-img/hipjazz.jpg",
+           "default_action":{
+           "type":"web_url",
+           "url": "https://open.spotify.com/playlist/1j6WnMbAhQLZyjOYiWDxVB?si=tNbSXXdqTdeo-Z_hYcc9bw",
+           "webview_height_ratio":"tall",
+           },
+            "buttons":[
+              {
+                "type":"web_url",
+                "url":"https://open.spotify.com/playlist/1j6WnMbAhQLZyjOYiWDxVB?si=tNbSXXdqTdeo-Z_hYcc9bw",
+                "title":"Play now!"
+              }              
+            ]      
+          }
+        ]
+      }
+    }
+  }
 	}
 	return payload
 def find_related_urls(title,website):
@@ -158,15 +176,44 @@ def get_motiv_images(recipient_id):
 		"notification_type": "regular",
 	}
 	return payload_motiv
-def get_meme():
-    reddit = praw.Reddit(client_id=config.client_id,
-                         client_secret=config.client_secret,
-                         user_agent=config.user_agent)
-    subreddit = reddit.subreddit('ProgrammerHumor')
-    posts = subreddit.top(limit=20)
-    image_urls = []
-    for post in posts:
-        image_urls.append(post.url)
-    img_url = image_urls[random.randint(1, 99)]
-    print (img_url)
-    
+def get_meme(recipient_id):
+	reddit = praw.Reddit(client_id=client_id,client_secret=client_secret,user_agent=user_agent)
+	subreddit = reddit.subreddit('ProgrammerHumor')
+	posts = subreddit.top(limit=20)
+	image_urls = []
+	for post in posts:
+		image_urls.append(post.url)
+	img_url = image_urls[random.randint(1, 19)]
+	#print (img_url)
+	payload = {
+	#"recipient":{"id":recipient_id},
+	"message":{
+	"attachment":{
+	  "type":"image", 
+	  "payload":{
+		"is_reusable": True,
+		"url":img_url
+	  }
+	}
+	}
+	}
+	response = send_url_request(payload)
+	# print (response.json())
+	payload_meme = {
+	"recipient":{"id":recipient_id},
+	  "message":{
+		"attachment": {
+		  "type": "template",
+		  "payload": {
+			 "template_type": "media",
+			 "elements": [
+				{
+				   "media_type": "image",
+				   "attachment_id": (response.json())["attachment_id"]
+				}
+			 ]
+		  }
+		}    
+	  }
+	}
+	return payload_meme

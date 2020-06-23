@@ -8,6 +8,8 @@ FB_HANDOVER_URL = "https://graph.facebook.com/v7.0/me/pass_thread_control"
 FB_TAKE_URL = "https://graph.facebook.com/v7.0/me/take_thread_control"
 def send_request(payload):
     auth = {"access_token": ACCTOKEN}
+    print("Payload:")
+    print(payload)
     response = requests.post(FB_API_URL, params=auth, json=payload)
     print(response, response.json())
     return "success"
@@ -28,5 +30,5 @@ def take_handover_request(payload):
     return "success"
 def send_url_request(payload):
     auth = {"access_token": ACCTOKEN}
-    response = requests.post(FB_API_URL, params=auth, json=payload)
+    response = requests.post(FB_ATTACH_URL, params=auth, json=payload)
     return response

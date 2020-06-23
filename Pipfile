@@ -23,6 +23,8 @@ google-search = "*"
 google = "*"
 youtube-dl = "*"
 praw = "*"
+spotipy = "*"
+wit = "*"
 
 [requires]
 python_version = "3.6"
