@@ -6,3 +6,5 @@ WIT_DEPRESS = "N7OG7HJ4UAPOECYQ5WLIZXKOH5NSEYEZ"
 client_id = '4mzbizZ_uERM6Q'
 client_secret = 'oZFk5R4YZLEex_kiiQVvLTl7CnY'
 user_agent = 'meme-holder'
+secret_key = "AIzaSyClL8KaVSTEz--jFCjJqgoZsCRZyHoDqZQ"
+search_engine_key = "007198766016031054593:opgpnuo0g-g"

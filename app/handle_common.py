@@ -203,7 +203,28 @@ def bot_info(recipient_id):
     payload = {
         "recipient": {"id": recipient_id},
         "messaging_type": "RESPONSE",
-        "message": {"text": "Here are a list of things I can do."}
+        "message": {"text": 
+            '''
+             Hi, I am CheerioBot.
+             I am here to help you in case you ever need someone to lift your spirits or just a friend to hang out with, 
+             and you can talk to me regardless of whether you feel happy or sad!
+             I don't like to boast 😛 but here are a couple of things I can do for you:
+             
+             Fetch jokes and learn which genres you prefer based on your ratings,
+             Fetch music from a curated Spotify playlist,
+             Fetch motivational quotes,
+             Fetch memes,
+             Fetch videos of yoga techniques,
+             Fetch motivational videos,
+             Connect you to a fellow user if you want some company(I will keep all of your personal info safe, don't u worry!),
+             Book an appointment with a therapist and connect you to him/her in your preferred slot.
+
+             Please refer to our Code of Conduct for expected behavior when you are chatting with another user or your therapist.
+             I do take hatespeech seriously, and if you are uncomfortable, feel free to report your partner using /report,
+             and I will put you in touch with one of our admins to explain your issue. 
+
+             Hope I can be of help to you!!
+             '''}
     }
     return payload
     

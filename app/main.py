@@ -41,7 +41,8 @@ reported_person = 0
 # We will receive messages that Facebook sends our bot at this endpoint
 def check_one_time_notif():
 	time_now = datetime.datetime.now().strftime("%H:%M")
-	for i in db.one_time_notif.find({"notif_time": time_now}):
+	date_now = datetime.datetime.now().strftime("%d.%m.%Y")
+	for i in db.one_time_notif.find({"notif_time": time_now,"date":date_now}):
 		payload = {
 			"recipient": {"one_time_notif_token": i["notif_token"]},
 			"message": {"text": "You have an appointment at " + i["app_time"]},
@@ -60,6 +61,22 @@ def check_appointment():
 		db.user_status.update_one({"_id":therapist},{"$set":{"status":91}})
 		therapist_id = (db.user_status.find_one({"_id":therapist}))["user"]
 		print (therapist_id,user)
+		payload = {
+			"recipient": {"id": therapist_id},
+			"notification_type": "regular",
+			"message": {
+				"text": "You have been connected to your patient."
+			},
+			}
+		send_request(payload)
+		payload = {
+			"recipient": {"id": user},
+			"notification_type": "regular",
+			"message": {
+				"text": "You have been connected to your therapist."
+			},
+			}
+		send_request(payload)
 		db.paired_peeps.insert_one({"fp": therapist_id, "sp": user, "timestamp_fp" : datetime.datetime.now(),"timestamp_sp" : datetime.datetime.now()})
 
 
@@ -118,17 +135,18 @@ def check_id(id):
 		return (check_user["status"],0)
 	
 
-sched = BackgroundScheduler()
-sched.add_job(check_one_time_notif, "cron", minute="0,10,20,30,40,50")
-sched.start()
-
-sched = BackgroundScheduler()
-sched.add_job(one_minute_jobs, "cron", minute="0-59")
-sched.start()
+sched1 = BackgroundScheduler()
+sched1.add_job(check_one_time_notif, "cron", minute="0,10,20,30,40,50")
+#sched1.add_job(check_one_time_notif, "cron", minute="0-59")
+sched1.start()
 
 sched2 = BackgroundScheduler()
-sched2.add_job(check_appointment, "cron", minute="0,30")
+sched2.add_job(one_minute_jobs, "cron", minute="0-59")
 sched2.start()
+
+sched3 = BackgroundScheduler()
+sched3.add_job(check_appointment, "cron", minute="0,30")
+sched3.start()
 
 @app.route("/main", methods=["GET", "POST"])
 def receive_message():
@@ -323,22 +341,11 @@ def receive_message():
 						if message.get("message"):
 							response_sent_text = message["message"]["text"]
 							if (response_sent_text=="/end"):
-								db.paired_peeps.remove({"fp":person["fp"],"sp":person["sp"]})
-								db.user_status.update_one({"user": person["sp"]}, {"$set": {"status": 0}})
-								db.user_status.update_one({"user": person["fp"]}, {"$set": {"status": 90}})
-								payload_partner = {
-									"message": {
-										"text": "Thank you for your time!!! "
-									},
-									"recipient": {"id": person["fp"]},
-									"notification_type": "regular"
-								}
-								send_request(payload_partner)
 								payload = {
 									"recipient": {"id": person["sp"]},
 									"notification_type": "regular",
 									"message": {
-										"text": "The chat ended. Hope we could help you."
+										"text": "You don't have permissions to end the conversation. If your meeting is over, please ask your therapist to enter /end."
 									},
 								}
 							else:

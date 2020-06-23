@@ -159,20 +159,21 @@ def getYoga_displayed(recipient_id):
 	}
 	return payload_yoga
 def suggest_motiv():
-	yoga_lst = ["Motivational stories","Inspirational stories"]
+	yoga_lst = ["Inspire yourself","Motivational stories"]
 	query = random.choice(yoga_lst)
 	return find_youtube_urls(query)
+
 def get_motiv_images(recipient_id):
 	url = suggest_motiv()
-	print (url[0])
+	print (url)
 	payload = {
-		"message": {"text": "Why don't you go through this site I found? It has some interesting stories to keep you occupied."},
+		"message": {"text": "Why don't you go through these videos I found? They have some interesting stories to keep you occupied."},
 		"recipient": {"id": recipient_id},
 		"notification_type": "regular",
 	}
 	send_request(payload)
 	payload_motiv = {
-		"message": {"text": url[0]},
+		"message": {"text": url},
 		"recipient": {"id": recipient_id},
 		"notification_type": "regular",
 	}
