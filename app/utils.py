@@ -1,5 +1,6 @@
 import praw
 import random
+from time import sleep
 import requests
 from .quick_replies import *
 from .fb_requests import *
@@ -135,6 +136,7 @@ def find_youtube_urls(title):
 	# 	#print(q)
 	# 	related_urls.append(q)
 	results = YoutubeSearch(title,max_results=1).to_dict()
+	sleep(5)
 	print ("results:",results)
 	print ("json: ",results[0]["link"])
 	link_res = "https://youtube.com"+results[0]["link"]
@@ -201,6 +203,7 @@ def get_meme(recipient_id):
 	}
 	response = send_url_request(payload)
 	# print (response.json())
+	sleep(3)
 	payload_meme = {
 	"recipient":{"id":recipient_id},
 	  "message":{

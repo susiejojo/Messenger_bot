@@ -204,27 +204,7 @@ def bot_info(recipient_id):
         "recipient": {"id": recipient_id},
         "messaging_type": "RESPONSE",
         "message": {"text": 
-            '''
-             Hi, I am CheerioBot.
-             I am here to help you in case you ever need someone to lift your spirits or just a friend to hang out with, 
-             and you can talk to me regardless of whether you feel happy or sad!
-             I don't like to boast 😛 but here are a couple of things I can do for you:
-             
-             Fetch jokes and learn which genres you prefer based on your ratings,
-             Fetch music from a curated Spotify playlist,
-             Fetch motivational quotes,
-             Fetch memes,
-             Fetch videos of yoga techniques,
-             Fetch motivational videos,
-             Connect you to a fellow user if you want some company(I will keep all of your personal info safe, don't u worry!),
-             Book an appointment with a therapist and connect you to him/her in your preferred slot.
-
-             Please refer to our Code of Conduct for expected behavior when you are chatting with another user or your therapist.
-             I do take hatespeech seriously, and if you are uncomfortable, feel free to report your partner using /report,
-             and I will put you in touch with one of our admins to explain your issue. 
-
-             Hope I can be of help to you!!
-             '''}
+            "Hi, I am CheerioBot.\nI am here to help you in case you ever need someone to lift your spirits or just a friend to hang out with,\nand you can talk to me regardless of whether you feel happy or sad!\nI don't like to boast 😛 but here are a couple of things I can do for you:\nFetch jokes and learn which genres you prefer based on your ratings,\nFetch music from a curated Spotify playlist,\nFetch motivational quotes,\nFetch memes,\nFetch videos of yoga techniques,\nFetch motivational videos,\nConnect you to a fellow user if you want some company(I will keep all of your personal info safe, don't u worry!),\nBook an appointment with a therapist and connect you to him/her in your preferred slot.\nPlease refer to our Code of Conduct for expected behavior when you are chatting with another user or your therapist.\nI do take hatespeech seriously, and if you are uncomfortable, feel free to report your partner using /report,\nand I will put you in touch with one of our admins to explain your issue.\nHope I can be of help to you!!"}
     }
     return payload
     
@@ -242,8 +222,8 @@ def call_for_help(recipient_id):
                     {
                         "type":"phone_number",
                         "title":"Call for help",
-                        "payload": "+919474925889"
-                        #"payload":"09152987821"
+                        #"payload": "+919474925889"
+                        "payload":"+919152987821"
                     }]
                 }
             }

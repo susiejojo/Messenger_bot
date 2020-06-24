@@ -2,7 +2,7 @@ from .data import *
 from .fb_requests import *
 from .send_message import *
 
-
+code_of_conduct = "You can now chat live with your partner! Here's a list of instructions you can use to control your chat experiece\n1. /report - To report your partner and explain your issue to the admins\n2. /end - To end the conversation and return to the bot\n\nA few things to keep in mind:\n*Do not share sensitive info like address, locations, phone numbers, email-ids\n*Attachment sending is disabled for security purposes to avoid sharing of personal images etc.\n*Avoid using offensive speech as it may lead to blocking by admins\nHope you have an amazing chat experience!"
 def sorry_text(db,minute_delta):
     for i in db.pool.find({}):
         if datetime.datetime.now() - i["timestamp"] > minute_delta:
@@ -54,13 +54,21 @@ def talk_to_someone(recipient_id, db):
                 })
             payload_partner = {
                 "message": {
-                    "text": "Congrats! You have been paired with " + str(user_name)
+                    "text": "Congrats! You have been paired with " + str(user_name) + ". Please take some time to go through our Code of Conduct and control instructions."
                 },
                 "recipient": {"id": partner_id},
                 "notification_type": "regular",
                 "persona_id": persona_id_self
             }
             send_request(payload_partner)
+            payload_next = {
+                "message": {
+                    "text": code_of_conduct
+                },
+                "recipient": {"id": partner_id},
+                "notification_type": "regular"
+                }
+            send_request(payload_next)
             persona_id = send_persona_request({
                 "name":partner_username,
                 "profile_picture_url": partner_pic
@@ -68,7 +76,7 @@ def talk_to_someone(recipient_id, db):
             payload = {
                 "message": {
                     "text": "Congrats! You have been paired with "
-                    + str(partner_username)
+                    + str(partner_username) + ". Please take some time to go through our Code of Conduct and control instructions."
                 },
                 "recipient": {"id": recipient_id},
                 "notification_type": "regular",
@@ -78,11 +86,17 @@ def talk_to_someone(recipient_id, db):
             db.user_status.update_one(
                 {"user": recipient_id}, {"$set": {"status": 10}}
             )
-
+            send_request(payload)
             db.user_status.update_one({"user": partner_id}, {"$set": {"status": 10}})
             db.paired_peeps.insert_one({"fp": recipient_id, "sp": partner_id, "persona_id_sp": persona_id,"persona_id_fp": persona_id_self,"timestamp_fp" : datetime.datetime.now(),"timestamp_sp" : datetime.datetime.now()})
-            
-            return payload
+            payload_next = {
+                "message": {
+                    "text": code_of_conduct
+                },
+                "recipient": {"id": recipient_id},
+                "notification_type": "regular"
+                }
+            return payload_next
         else:
             payload = {
                 "message": {
