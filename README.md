@@ -17,6 +17,8 @@ A Facebook messenger bot that aims to prevent suicides by connecting people toge
 - Hatespeech detection using user-to-user convo using Wit.ai and immediate reporting to the admins
 - Option to report an user in case of misbehavior and present the issue via live chat with the admins using Handover Protocol.
 - Disable sending of email id, phone numbers and addresses between two users.
+- Disable attachment sharing to prevent sharing personal images etc.
+- Point based system to judge user misbehavior using chats with other users. Users with very high score get blocked temporarily.
 - Partner rating after conversation ends.
 - Meme suggestions and display in Messenger
 - Joke suggestions which learns to adapt to user likes and dislikes based on user's rating on each joke.
