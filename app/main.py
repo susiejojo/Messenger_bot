@@ -125,14 +125,20 @@ def check_id(id):
 
 	check_user = db.user_status.find_one({"user": id})
 	if check_user is None:
-		db.user_status.insert_one({"user": id, "status": 0,"joke_calls":0})
+		db.user_status.insert_one({"user": id, "status": 0,"joke_calls":0, "bad_score": 0})
 		db.joke_categories.insert_one({"user":id,"score0":20})
 		db.joke_categories.insert_one({"user":id,"score1":20})
 		db.joke_categories.insert_one({"user":id,"score2":20})
 		db.joke_categories.insert_one({"user":id,"score3":20})
 		return (0,1)
 	else:
-		return (check_user["status"],0)
+		if check_user["status"] == 0 and check_user["bad_score"] >=50:
+			print("ahola")
+			db.user_status.update_one({"user": id}, {"$set": {"status": 50}})
+			return (50,0)
+		else:
+			print("ahola2", check_user["status"], check_user["bad_score"])
+			return (check_user["status"],0)
 	
 
 sched1 = BackgroundScheduler()
@@ -229,6 +235,15 @@ def receive_message():
 									payload = handle_quickreply(db, message["sender"]["id"], message['message']['quick_reply']['payload'])
 									send_request(payload)
 									print("yes")
+								elif(message["message"].get("attachments")):
+									payload = {
+										"recipient": {"id": message["sender"]["id"]},
+										"notification_type": "regular",
+										"message": {
+											"text": "You can't send any attachments in p2p. Please check out our code of conduct."
+										},
+									}
+									send_request(payload)
 								else:
 									if person is None:
 										person = db.paired_peeps.find_one(
@@ -264,6 +279,7 @@ def receive_message():
 										}
 										send_request(payload_partner)
 									elif (response_sent_text=="/report"):
+								
 										db.paired_peeps.remove({"fp":person["fp"],"sp":person["sp"]})
 										db.user_status.update_one({"user": person["sp"]}, {"$set": {"status": 0}})
 										db.user_status.update_one({"user": person["fp"]}, {"$set": {"status": 0}})
@@ -271,6 +287,8 @@ def receive_message():
 											reported_person =  person["sp"]
 										else:
 											reported_person =  person["fp"]
+										db.user_status.update_one({"user":reported_person},{"$inc":{"bad_score":int(10)}})
+										db.blocked_users.insert_one({"user" : message["sender"]["id"], "blocked": reported_person})
 										print(reported_person)
 										db.report.insert_one({"reported_user":reported_person,"reporting_user":message["sender"]["id"],"issue":""})
 										payload = {
@@ -322,6 +340,7 @@ def receive_message():
 												}
 											}
 											db.hate_messages.insert_one({"sender": sender_id, "message": response_sent_text})
+											db.user_status.update_one({"user":sender_id},{"$inc":{"bad_score":int(2)}})
 										elif check_hate_and_confi==2:
 											payload = {
 												"recipient": {"id": sender_id},
@@ -388,6 +407,15 @@ def receive_message():
 										"persona" : persona_id_psych
 									}
 							send_request(payload)    
+					elif status//10 == 5:
+						payload = {
+							"recipient": {"id": recipient_id},
+							"notification_type": "regular",
+							"message": {
+								"text": "You have been banned from using the app because you have been blocked by a lot of user or you have used a lot of abusive language. Please contact the page admins if you have any queries."
+							},
+						}
+						send_request(payload)
 			elif (event.get("standby")):
 				handle_standby(event["standby"])
 	return "Message Processed"

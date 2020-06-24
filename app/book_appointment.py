@@ -13,6 +13,8 @@ def book_appointment(value, recipient_id, db):
                 dates_remove.append(i)
         for i in dates_remove:
             dates.remove(i)
+        if (len(dates)>7):
+            dates=dates[:7]
         if (len(dates)==0):
             payload = {
                 "message": {

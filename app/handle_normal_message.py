@@ -33,6 +33,12 @@ def send_message(db, recipient_id, text, message_rec, new_user):
                 "messaging_type": "RESPONSE",
                 "message": {"text": "Pick a color:", "quick_replies": replies["color"]},
             }
+        elif intent == "url":
+            payload = {
+                "recipient": {"id": recipient_id},
+                "messaging_type": "RESPONSE",
+                "message": {"text": "Sorry, I don't support url sharing right now. I can give you urls if you want."},
+            }
         elif intent == "Get a joke":
             payload = jokes_util(recipient_id,db)
             db.flow_convo.update_one({"user": recipient_id}, {'$set' : {"tag" : "attachment"}})
@@ -90,7 +96,12 @@ def send_message(db, recipient_id, text, message_rec, new_user):
 def handle_normal_message(db,recipient_id,message, new_user):
     # Facebook Messenger ID for user so we know where to send response back to
     if (message["message"].get("attachments")):
-        print("Attachment not supported")
+        payload = {
+            "message": {"text": "Attachment not supported"},
+            "recipient": {"id": recipient_id},
+            "notification_type": "regular",
+        }
+        send_request(payload)
     if message["message"].get("text"):
         response_sent_text = get_message()
         send_message(

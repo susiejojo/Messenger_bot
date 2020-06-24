@@ -43,6 +43,7 @@ def handle_nlp(db, recipient_id, message):
     greeting = firstTrait(message["nlp"], 'wit$greetings')
     sentiment = firstTrait(message["nlp"], 'wit$sentiment')
     bye = firstTrait(message["nlp"], 'wit$bye')
+    url = firstEntity(message["nlp"], 'wit$url:url')
     print(sentiment and sentiment["value"],sentiment and sentiment["confidence"])
     last_convo = db.flow_convo.find_one({"user": recipient_id})["tag"]
     state = db.flow_convo.find_one({"user": recipient_id})["state"]
@@ -53,6 +54,9 @@ def handle_nlp(db, recipient_id, message):
         elif (bye and bye["confidence"] > 0.8):
             print("bye")
             return "Bye"
+        elif (url and url["confidence"] > 0.8):
+            print("url")
+            return "url"
         intent_response = client_intent.message(message["text"])
         depress_response = client_depress.message(message["text"])
         depress_text = ''
