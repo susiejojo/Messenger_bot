@@ -1,0 +1,30 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+
+[packages]
+flask = "*"
+gunicorn = "*"
+pymessenger = "*"
+flask-pymongo = "*"
+flask-restful = "*"
+pymongo = {extras = ["srv"],version = "*"}
+pytz = "*"
+werkzeug = "*"
+six = "*"
+pipfile = "*"
+apscheduler = "*"
+dnspython = "*"
+schedule = "*"
+google = "*"
+praw = "*"
+spotipy = "*"
+wit = "*"
+youtube-search = "*"
+google-api-python-client = "*"
+
+[requires]
+python_version = "3.6"
