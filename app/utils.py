@@ -1,5 +1,6 @@
 import praw
 import random
+from time import sleep
 import requests
 from .quick_replies import *
 from .fb_requests import *
@@ -124,27 +125,29 @@ def get_music(recipient_id):
   }
 	}
 	return payload
-def find_related_urls(title,website):
+def find_youtube_urls(title):
 	try:
-		from googlesearch import search 
+		from youtube_search import YoutubeSearch 
 	except ImportError:
-		print("No module named 'google' found") 
+		print("No module named 'youtube' found") 
 	#print(title)
-	related_urls = []
-	query1 = website + title
 	#print("Sugesstion")
-	for q in search(query1, tld="com", num=10, stop=1, pause=2):
-		#print(q)
-		related_urls.append(q)
-	return related_urls
+	# for q in search(query1, tld="com", num=10, stop=1, pause=2):
+	# 	#print(q)
+	# 	related_urls.append(q)
+	results = YoutubeSearch(title,max_results=1).to_dict()
+	sleep(5)
+	print ("results:",results)
+	print ("json: ",results[0]["link"])
+	link_res = "https://youtube.com"+results[0]["link"]
+	return link_res
 
 def suggest_yoga():
-	yoga_lst = ["Depression yoga","yoga asana practice for mind relaxation"]
+	yoga_lst = ["Depression yoga","Relaxation yoga"]
 	query = random.choice(yoga_lst)
-	return find_related_urls(query,"youtube")
+	return find_youtube_urls(query)
 def getYoga_displayed(recipient_id):
 	url = suggest_yoga()
-	print (url[0])
 	payload = {
 		"message": {"text": "Here is a link to a yoga technique that may help you."},
 		"recipient": {"id": recipient_id},
@@ -152,26 +155,27 @@ def getYoga_displayed(recipient_id):
 	}
 	send_request(payload)
 	payload_yoga = {
-		"message": {"text": url[0]},
+		"message": {"text": url},
 		"recipient": {"id": recipient_id},
 		"notification_type": "regular",
 	}
 	return payload_yoga
 def suggest_motiv():
-	yoga_lst = ["Motivational stories","Inspirational stories"]
+	yoga_lst = ["Inspire yourself","Motivational stories"]
 	query = random.choice(yoga_lst)
-	return find_related_urls(query,"google")
+	return find_youtube_urls(query)
+
 def get_motiv_images(recipient_id):
 	url = suggest_motiv()
-	print (url[0])
+	print (url)
 	payload = {
-		"message": {"text": "Why don't you go through this site I found? It has some interesting stories to keep you occupied."},
+		"message": {"text": "Why don't you go through these videos I found? They have some interesting stories to keep you occupied."},
 		"recipient": {"id": recipient_id},
 		"notification_type": "regular",
 	}
 	send_request(payload)
 	payload_motiv = {
-		"message": {"text": url[0]},
+		"message": {"text": url},
 		"recipient": {"id": recipient_id},
 		"notification_type": "regular",
 	}
@@ -179,7 +183,7 @@ def get_motiv_images(recipient_id):
 def get_meme(recipient_id):
 	reddit = praw.Reddit(client_id=client_id,client_secret=client_secret,user_agent=user_agent)
 	subreddit = reddit.subreddit('ProgrammerHumor')
-	posts = subreddit.top(limit=20)
+	posts = subreddit.top(limit=40)
 	image_urls = []
 	for post in posts:
 		image_urls.append(post.url)
@@ -199,6 +203,7 @@ def get_meme(recipient_id):
 	}
 	response = send_url_request(payload)
 	# print (response.json())
+	sleep(3)
 	payload_meme = {
 	"recipient":{"id":recipient_id},
 	  "message":{

@@ -6,7 +6,7 @@ def handle_greeting(recipient_id, new_user):
     message = ""
     if new_user:
         message = (
-            "Hi there! Enter /help to view what I can do. How can I help you today?"
+        "Hi there! I am CheerioBot.\nI can keep you entertained with songs,memes,jokes,quotes and connect you to fellow users\nor therapists if you feel depressed. I can schedule your appointments and put you through live chat with your therapist.\nI also work to detect hatespeech and sensitive information in your chats with others to maintain your privacy.\nWith me around, I promise you will never feel lonely! Anytime u feel like you are feeling upset, just let me know\nand I will do my magic on you!\nIf you are willing to know in details what all I am capable of, just go ahead and ask or type /help."
         )
     else:
         message = "Welcome back!!! How are you feeling today?"
@@ -203,7 +203,8 @@ def bot_info(recipient_id):
     payload = {
         "recipient": {"id": recipient_id},
         "messaging_type": "RESPONSE",
-        "message": {"text": "Here are a list of things I can do."}
+        "message": {"text": 
+            "Hi, I am CheerioBot.\nI am here to help you in case you ever need someone to lift your spirits or just a friend to hang out with,\nand you can talk to me regardless of whether you feel happy or sad!\nI don't like to boast 😛 but here are a couple of things I can do for you:\nFetch jokes and learn which genres you prefer based on your ratings,\nFetch music from a curated Spotify playlist,\nFetch motivational quotes,\nFetch memes,\nFetch videos of yoga techniques,\nFetch motivational videos,\nConnect you to a fellow user if you want some company(I will keep all of your personal info safe, don't u worry!),\nBook an appointment with a therapist and connect you to him/her in your preferred slot.\nPlease refer to our Code of Conduct for expected behavior when you are chatting with another user or your therapist.\nI do take hatespeech seriously, and if you are uncomfortable, feel free to report your partner using /report,\nand I will put you in touch with one of our admins to explain your issue.\nHope I can be of help to you!!"}
     }
     return payload
     
@@ -221,8 +222,8 @@ def call_for_help(recipient_id):
                     {
                         "type":"phone_number",
                         "title":"Call for help",
-                        "payload": "+919474925889"
-                        #"payload":"09152987821"
+                        #"payload": "+919474925889"
+                        "payload":"+919152987821"
                     }]
                 }
             }

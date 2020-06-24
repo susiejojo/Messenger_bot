@@ -9,4 +9,4 @@ def handle_standby(standby):
 			"recipient":{"id":recipient_id},
 			"metadata":"Giving control back to bot"
 			}
-			take_handover_request(take_payload)
+			take_handover_request(take_payload,recipient_id)

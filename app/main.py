@@ -41,7 +41,8 @@ reported_person = 0
 # We will receive messages that Facebook sends our bot at this endpoint
 def check_one_time_notif():
 	time_now = datetime.datetime.now().strftime("%H:%M")
-	for i in db.one_time_notif.find({"notif_time": time_now}):
+	date_now = datetime.datetime.now().strftime("%d.%m.%Y")
+	for i in db.one_time_notif.find({"notif_time": time_now,"date":date_now}):
 		payload = {
 			"recipient": {"one_time_notif_token": i["notif_token"]},
 			"message": {"text": "You have an appointment at " + i["app_time"]},
@@ -60,6 +61,22 @@ def check_appointment():
 		db.user_status.update_one({"_id":therapist},{"$set":{"status":91}})
 		therapist_id = (db.user_status.find_one({"_id":therapist}))["user"]
 		print (therapist_id,user)
+		payload = {
+			"recipient": {"id": therapist_id},
+			"notification_type": "regular",
+			"message": {
+				"text": "You have been connected to your patient."
+			},
+			}
+		send_request(payload)
+		payload = {
+			"recipient": {"id": user},
+			"notification_type": "regular",
+			"message": {
+				"text": "You have been connected to your therapist."
+			},
+			}
+		send_request(payload)
 		db.paired_peeps.insert_one({"fp": therapist_id, "sp": user, "timestamp_fp" : datetime.datetime.now(),"timestamp_sp" : datetime.datetime.now()})
 
 
@@ -118,17 +135,18 @@ def check_id(id):
 		return (check_user["status"],0)
 	
 
-sched = BackgroundScheduler()
-sched.add_job(check_one_time_notif, "cron", minute="0,10,20,30,40,50")
-sched.start()
-
-sched = BackgroundScheduler()
-sched.add_job(one_minute_jobs, "cron", minute="0-59")
-sched.start()
+sched1 = BackgroundScheduler()
+sched1.add_job(check_one_time_notif, "cron", minute="0,10,20,30,40,50")
+#sched1.add_job(check_one_time_notif, "cron", minute="0-59")
+sched1.start()
 
 sched2 = BackgroundScheduler()
-sched2.add_job(check_appointment, "cron", minute="0,30")
+sched2.add_job(one_minute_jobs, "cron", minute="0-59")
 sched2.start()
+
+sched3 = BackgroundScheduler()
+sched3.add_job(check_appointment, "cron", minute="0,30")
+sched3.start()
 
 @app.route("/main", methods=["GET", "POST"])
 def receive_message():
@@ -207,110 +225,134 @@ def receive_message():
 							persona_id_cur = ""
 							person = db.paired_peeps.find_one({"fp": message["sender"]["id"]})
 							if message.get("message"):
-								if person is None:
-									person = db.paired_peeps.find_one(
-										{"sp": message["sender"]["id"]}
-									)
-									recipient_id = person["fp"]
-									sender_id = person["sp"]
-									cur_speaker = "sp"
-									persona_id_cur = person["persona_id_sp"]
+								if message["message"].get('quick_reply'):
+									payload = handle_quickreply(db, message["sender"]["id"], message['message']['quick_reply']['payload'])
+									send_request(payload)
+									print("yes")
 								else:
-									recipient_id = person["sp"]
-									sender_id = person["fp"]
-									cur_speaker = "fp"
-									persona_id_cur = person["persona_id_fp"]
-								response_sent_text = message["message"]["text"]
-								if (response_sent_text=="/end"):
-									db.paired_peeps.remove({"fp":person["fp"],"sp":person["sp"]})
-									db.user_status.update_one({"user": person["sp"]}, {"$set": {"status": 0}})
-									db.user_status.update_one({"user": person["fp"]}, {"$set": {"status": 0}})
-									payload = {
-									"recipient": {"id": message["sender"]["id"]},
-									"notification_type": "regular",
-									"message": {
-										"text": "The chat ended. We hope you feel better. Please take some time to rate your partner.", "quick_replies": replies["end_rating"]
-									},
-									}
-									payload_partner = {
-									"recipient": {"id": recipient_id},
-									"notification_type": "regular",
-									"message": {
-										"text": "The chat ended. We hope you feel better. Please take some time to rate your partner.", "quick_replies": replies["end_rating"]
-									},
-									}
-									send_request(payload_partner)
-								elif (response_sent_text=="/report"):
-									db.paired_peeps.remove({"fp":person["fp"],"sp":person["sp"]})
-									db.user_status.update_one({"user": person["sp"]}, {"$set": {"status": 0}})
-									db.user_status.update_one({"user": person["fp"]}, {"$set": {"status": 0}})
-									if person["fp"] == message["sender"]["id"]:
-										reported_person =  person["sp"]
+									if person is None:
+										person = db.paired_peeps.find_one(
+											{"sp": message["sender"]["id"]}
+										)
+										recipient_id = person["fp"]
+										sender_id = person["sp"]
+										cur_speaker = "sp"
+										persona_id_cur = person["persona_id_sp"]
 									else:
-										reported_person =  person["fp"]
-									print(reported_person)
-									db.report.insert_one({"reported_user":reported_person,"reporting_user":message["sender"]["id"],"issue":""})
-									payload = {
-										"recipient": {"id": message["sender"]["id"]},
-										"notification_type": "regular",
-										"message": {
-											"attachment":{
-											"type":"template",
-											"payload":{
-												"template_type":"button",
-												"text":"You reported your partner. Help us identify the issue!",
-												"buttons":[
-													{
-														"type":"postback",
-														"title":"Harassment/bullying",
-														"payload" : "harass"
-													},
-													{
-														"type":"postback",
-														"title":"Rude/insensitive",
-														"payload" : "rude"
-													},
-													{
-														"type":"postback",
-														"title":"Prankster/troll",
-														"payload" : "troll"
-													}
-												]
-												}
-											}
-										},
-									}
-									payload_partner = {
-									"recipient": {"id": recipient_id},
-									"notification_type": "regular",
-									"message": {
-										"text": "We are sorry but your partner reported you. The admins will review the report and get back to you."
-									},
-									}
-									send_request(payload_partner)
-								else:
-									if handle_hatespeech(message["message"]):
+										recipient_id = person["sp"]
+										sender_id = person["fp"]
+										cur_speaker = "fp"
+										persona_id_cur = person["persona_id_fp"]
+									response_sent_text = message["message"]["text"]
+									if (response_sent_text=="/end"):
+										db.paired_peeps.remove({"fp":person["fp"],"sp":person["sp"]})
+										db.user_status.update_one({"user": person["sp"]}, {"$set": {"status": 0}})
+										db.user_status.update_one({"user": person["fp"]}, {"$set": {"status": 0}})
 										payload = {
-											"recipient": {"id": sender_id},
+											"recipient": {"id": message["sender"]["id"]},
 											"notification_type": "regular",
 											"message": {
-												"text": "You are violating our code of conduct. Please don't take use any abusive or sexist language. This action has been reported"
-											}
+												"text": "The chat ended. We hope you feel better. Please take some time to rate your partner.", "quick_replies": replies["end_rating"]
+											},
 										}
-										db.hate_messages.insert_one({"sender": sender_id, "message": response_sent_text})
-									else:
-										payload = {
+										payload_partner = {
 											"recipient": {"id": recipient_id},
 											"notification_type": "regular",
 											"message": {
-												"text": response_sent_text
+												"text": "The chat ended. We hope you feel better. Please take some time to rate your partner.", "quick_replies": replies["end_rating"]
 											},
-											"persona_id": persona_id_cur
 										}
-								print("mesages sent")
-								send_request(payload)
-								timestamp_str = "timestamp_"+cur_speaker
-								db.paired_peeps.update_one({cur_speaker: person[cur_speaker]}, {"$set": {timestamp_str: datetime.datetime.now()}})
+										send_request(payload_partner)
+									elif (response_sent_text=="/report"):
+										db.paired_peeps.remove({"fp":person["fp"],"sp":person["sp"]})
+										db.user_status.update_one({"user": person["sp"]}, {"$set": {"status": 0}})
+										db.user_status.update_one({"user": person["fp"]}, {"$set": {"status": 0}})
+										if person["fp"] == message["sender"]["id"]:
+											reported_person =  person["sp"]
+										else:
+											reported_person =  person["fp"]
+										print(reported_person)
+										db.report.insert_one({"reported_user":reported_person,"reporting_user":message["sender"]["id"],"issue":""})
+										payload = {
+											"recipient": {"id": message["sender"]["id"]},
+											"notification_type": "regular",
+											"message": {
+												"attachment":{
+												"type":"template",
+												"payload":{
+													"template_type":"button",
+													"text":"You reported your partner. Help us identify the issue!",
+													"buttons":[
+														{
+															"type":"postback",
+															"title":"Harassment/bullying",
+															"payload" : "harass"
+														},
+														{
+															"type":"postback",
+															"title":"Rude/insensitive",
+															"payload" : "rude"
+														},
+														{
+															"type":"postback",
+															"title":"Prankster/troll",
+															"payload" : "troll"
+														}
+													]
+													}
+												}
+											},
+										}
+										payload_partner = {
+										"recipient": {"id": recipient_id},
+										"notification_type": "regular",
+										"message": {
+											"text": "We are sorry but your partner reported you. The admins will review the report and get back to you."
+										},
+										}
+										send_request(payload_partner)
+									else:
+										check_hate_and_confi = handle_hate_and_confi(message["message"])
+										if check_hate_and_confi==1:
+											payload = {
+												"recipient": {"id": sender_id},
+												"notification_type": "regular",
+												"message": {
+													"text": "You are violating our code of conduct. Please don't take use any abusive or sexist language. This action has been reported"
+												}
+											}
+											db.hate_messages.insert_one({"sender": sender_id, "message": response_sent_text})
+										elif check_hate_and_confi==2:
+											payload = {
+												"recipient": {"id": sender_id},
+												"notification_type": "regular",
+												"message": {
+													"text": "We have detected confidential information in the message that you are trying to send. We advice not to share information like phone numbers, email addresses and locations. If you still want to send the message, select Yes",
+													"quick_replies" : [
+														{
+															"content_type":"text",
+															"title":"Yes",
+															"payload":"message yes "+sender_id+" "+persona_id_cur+" "+recipient_id+"--"+response_sent_text+"--",
+														},{
+															"content_type":"text",
+															"title":"Np",
+															"payload":"message no "+sender_id,						}
+													]
+												}
+											}
+										else:
+											payload = {
+												"recipient": {"id": recipient_id},
+												"notification_type": "regular",
+												"message": {
+													"text": response_sent_text
+												},
+												"persona_id": persona_id_cur
+											}
+									print("mesages sent")
+									send_request(payload)
+									timestamp_str = "timestamp_"+cur_speaker
+									db.paired_peeps.update_one({cur_speaker: person[cur_speaker]}, {"$set": {timestamp_str: datetime.datetime.now()}})
 						elif status % 10 == 1:
 							db.user_status.update_one({"user": message["sender"]["id"]}, {"$set": {"status": 0}})
 							if message.get("message"):
@@ -323,22 +365,11 @@ def receive_message():
 						if message.get("message"):
 							response_sent_text = message["message"]["text"]
 							if (response_sent_text=="/end"):
-								db.paired_peeps.remove({"fp":person["fp"],"sp":person["sp"]})
-								db.user_status.update_one({"user": person["sp"]}, {"$set": {"status": 0}})
-								db.user_status.update_one({"user": person["fp"]}, {"$set": {"status": 90}})
-								payload_partner = {
-									"message": {
-										"text": "Thank you for your time!!! "
-									},
-									"recipient": {"id": person["fp"]},
-									"notification_type": "regular"
-								}
-								send_request(payload_partner)
 								payload = {
 									"recipient": {"id": person["sp"]},
 									"notification_type": "regular",
 									"message": {
-										"text": "The chat ended. Hope we could help you."
+										"text": "You don't have permissions to end the conversation. If your meeting is over, please ask your therapist to enter /end."
 									},
 								}
 							else:
