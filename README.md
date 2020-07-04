@@ -1,4 +1,4 @@
-# Fb_Hackathon
+# CheerioBot
 
 A Facebook messenger bot that aims to prevent suicides by connecting people together in times of depression, scheduling appointments with therapists and to keep the user entertained and motivated at all times.
 
