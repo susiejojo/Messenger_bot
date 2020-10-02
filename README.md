@@ -21,9 +21,8 @@ A Facebook messenger bot that aims to prevent suicides by connecting people toge
 - Point based system to judge user misbehavior using chats with other users. Users with very high score get blocked temporarily.
 - Partner rating after conversation ends.
 - Meme suggestions and display in Messenger
-- Joke suggestions which learns to adapt to user likes and dislikes based on user's rating on each joke.
+- Joke suggestions which learns to adapt to user likes and dislikes based on user's rating on each category of joke.
 - Motivational quote suggestions
-- Motivational video suggestions
 - Yoga and meditation suggestions in case of depression
 
 ### Psych interface
